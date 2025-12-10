@@ -1,0 +1,442 @@
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Users, Home, Utensils, Gift, CheckCircle, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const EtiquetteApp = () => {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [flippedCards, setFlippedCards] = useState({});
+  const [masteredCards, setMasteredCards] = useState({});
+  const [reviewCards, setReviewCards] = useState({});
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
+  const categories = [
+    { id: 'all', name: 'All Cards', icon: BookOpen },
+    { id: 'greeting', name: 'Greetings', icon: Users },
+    { id: 'dining', name: 'Dining', icon: Utensils },
+    { id: 'visiting', name: 'Visiting Home', icon: Home },
+    { id: 'gifting', name: 'Gift Giving', icon: Gift }
+  ];
+
+  const cards = [
+    {
+      id: 1,
+      category: 'greeting',
+      title: 'Address Elders Properly',
+      vietnamese: 'Xưng hô đúng với người lớn tuổi',
+      rule: 'Always use appropriate titles when addressing older people',
+      explanation: 'Vietnamese culture places great importance on age hierarchy. Use titles like "chú" (uncle), "cô" (aunt), "bác" (older uncle/aunt), or "ông/bà" (grandfather/grandmother) based on the person\'s age relative to your parents.',
+      example: 'If meeting your friend\'s parents, call them "chú" and "cô" instead of using their first names.',
+      dosDonts: {
+        do: 'Use proper titles based on age',
+        dont: 'Call elders by their first names'
+      }
+    },
+    {
+      id: 2,
+      category: 'greeting',
+      title: 'Two-Handed Greeting',
+      vietnamese: 'Bắt tay bằng hai tay',
+      rule: 'Use both hands when shaking hands with elders',
+      explanation: 'When greeting someone significantly older or in a position of authority, use both hands to shake their hand or place your left hand on your right forearm while shaking. This shows deep respect.',
+      example: 'When meeting your boss\'s parents at a company event, use both hands to shake their hands.',
+      dosDonts: {
+        do: 'Use both hands for elders',
+        dont: 'Use only one hand casually'
+      }
+    },
+    {
+      id: 3,
+      category: 'dining',
+      title: 'Wait for Elders to Eat First',
+      vietnamese: 'Đợi người lớn tuổi ăn trước',
+      rule: 'Never start eating before the eldest person at the table',
+      explanation: 'In Vietnamese dining culture, the oldest person should pick up their chopsticks and take the first bite before others begin eating. This shows respect for seniority.',
+      example: 'At a family dinner, wait until grandparents say "Mời mọi người ăn cơm" (Please everyone, eat) before starting.',
+      dosDonts: {
+        do: 'Wait patiently for the signal',
+        dont: 'Start eating when food arrives'
+      }
+    },
+    {
+      id: 4,
+      category: 'dining',
+      title: 'Two Hands for Offering',
+      vietnamese: 'Dùng hai tay khi mời đồ ăn',
+      rule: 'Use both hands when passing food or drinks to elders',
+      explanation: 'When offering tea, food, or passing dishes to someone older, use both hands to hold the item. This demonstrates respect and care.',
+      example: 'When pouring tea for your friend\'s mother, hold the teapot with both hands.',
+      dosDonts: {
+        do: 'Use both hands for serving',
+        dont: 'Pass items with one hand'
+      }
+    },
+    {
+      id: 5,
+      category: 'dining',
+      title: 'Don\'t Point with Feet',
+      vietnamese: 'Không chỉ bằng chân',
+      rule: 'Never point your feet at people or religious objects',
+      explanation: 'Feet are considered the lowest and dirtiest part of the body in Vietnamese culture. Pointing them at people, especially elders, or at altars/religious items is very disrespectful.',
+      example: 'When sitting on the floor, tuck your feet to the side rather than stretching them toward others.',
+      dosDonts: {
+        do: 'Keep feet tucked respectfully',
+        dont: 'Point feet at people or altars'
+      }
+    },
+    {
+      id: 6,
+      category: 'visiting',
+      title: 'Remove Shoes at the Door',
+      vietnamese: 'Cởi giày trước khi vào nhà',
+      rule: 'Always take off your shoes before entering someone\'s home',
+      explanation: 'Vietnamese homes maintain a clear boundary between outside and inside. Shoes carry dirt from the street and are always removed at the entrance. House slippers may be provided.',
+      example: 'When arriving at a Vietnamese home, look for other shoes at the entrance and remove yours there.',
+      dosDonts: {
+        do: 'Remove shoes at entrance',
+        dont: 'Walk in with outdoor shoes'
+      }
+    },
+    {
+      id: 7,
+      category: 'visiting',
+      title: 'Greet the Altar',
+      vietnamese: 'Chào bàn thờ gia tiên',
+      rule: 'Show respect to the family altar when entering',
+      explanation: 'Most Vietnamese homes have an ancestor altar. When entering, it\'s polite to acknowledge it with a slight bow or nod. This shows respect for the family\'s ancestors and beliefs.',
+      example: 'After removing shoes, give a small bow toward the altar before greeting the family members.',
+      dosDonts: {
+        do: 'Acknowledge the altar respectfully',
+        dont: 'Ignore or turn your back to it'
+      }
+    },
+    {
+      id: 8,
+      category: 'gifting',
+      title: 'Use Both Hands for Gifts',
+      vietnamese: 'Tặng và nhận quà bằng hai tay',
+      rule: 'Give and receive gifts with both hands',
+      explanation: 'Using both hands when exchanging gifts demonstrates respect and shows you value both the gift and the relationship. This applies to both giving and receiving.',
+      example: 'When visiting someone\'s home with a gift, present it with both hands and a slight bow.',
+      dosDonts: {
+        do: 'Use both hands for exchange',
+        dont: 'Casually hand gifts with one hand'
+      }
+    },
+    {
+      id: 9,
+      category: 'gifting',
+      title: 'Don\'t Open Gifts Immediately',
+      vietnamese: 'Không mở quà ngay',
+      rule: 'Wait to open gifts after the giver has left',
+      explanation: 'Unlike Western culture, Vietnamese people typically don\'t open gifts in front of the giver. This avoids potential embarrassment and shows that you value the gesture over the gift\'s value.',
+      example: 'When receiving a gift at someone\'s home, thank them and set it aside rather than opening it immediately.',
+      dosDonts: {
+        do: 'Thank and set aside politely',
+        dont: 'Tear open gifts immediately'
+      }
+    },
+    {
+      id: 10,
+      category: 'gifting',
+      title: 'Avoid Black and White Wrapping',
+      vietnamese: 'Tránh màu đen và trắng khi gói quà',
+      rule: 'Don\'t use black or white wrapping for gifts',
+      explanation: 'In Vietnamese culture, black and white are associated with funerals and death. Use bright, cheerful colors like red, pink, yellow, or gold for gift wrapping to symbolize luck and happiness.',
+      example: 'When wrapping a birthday gift, choose red or gold paper instead of elegant black wrapping.',
+      dosDonts: {
+        do: 'Use bright, cheerful colors',
+        dont: 'Use black or white wrapping'
+      }
+    },
+    {
+      id: 11,
+      category: 'greeting',
+      title: 'Slight Bow When Greeting',
+      vietnamese: 'Cúi đầu nhẹ khi chào',
+      rule: 'Add a slight bow when greeting elders or superiors',
+      explanation: 'A small head nod or bow accompanies verbal greetings, especially with people older or higher in social hierarchy. The deeper the bow, the more respect shown.',
+      example: 'When greeting your partner\'s grandparents, combine "Chào ông bà" with a respectful bow.',
+      dosDonts: {
+        do: 'Bow slightly with greetings',
+        dont: 'Stand stiffly without acknowledgment'
+      }
+    },
+    {
+      id: 12,
+      category: 'dining',
+      title: 'Don\'t Stick Chopsticks Upright',
+      vietnamese: 'Không cắm đũa thẳng vào bát cơm',
+      rule: 'Never leave chopsticks standing upright in rice',
+      explanation: 'Chopsticks stuck vertically in rice resemble incense sticks at funerals and are associated with death. Always lay chopsticks across your bowl or on a rest.',
+      example: 'When taking a break from eating, place chopsticks on the holder or across the bowl, never standing in the rice.',
+      dosDonts: {
+        do: 'Lay chopsticks flat on bowl',
+        dont: 'Stick them upright in rice'
+      }
+    }
+  ];
+
+  const filteredCards = selectedCategory === 'all' 
+    ? cards 
+    : cards.filter(card => card.category === selectedCategory);
+
+  const currentCard = filteredCards[currentCardIndex];
+
+  const toggleFlip = (cardId) => {
+    setFlippedCards(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }));
+  };
+
+  const toggleMastered = (cardId) => {
+    setMasteredCards(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }));
+    if (reviewCards[cardId]) {
+      setReviewCards(prev => {
+        const newState = { ...prev };
+        delete newState[cardId];
+        return newState;
+      });
+    }
+  };
+
+  const toggleReview = (cardId) => {
+    setReviewCards(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }));
+    if (masteredCards[cardId]) {
+      setMasteredCards(prev => {
+        const newState = { ...prev };
+        delete newState[cardId];
+        return newState;
+      });
+    }
+  };
+
+  const nextCard = () => {
+    if (currentCardIndex < filteredCards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+    }
+  };
+
+  const prevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+    }
+  };
+
+  useEffect(() => {
+    setCurrentCardIndex(0);
+  }, [selectedCategory]);
+
+  const stats = {
+    total: cards.length,
+    mastered: Object.keys(masteredCards).length,
+    review: Object.keys(reviewCards).length
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-4xl font-bold text-center mb-2">Vietnamese Etiquette Snippets</h1>
+          <p className="text-center text-pink-100 text-lg">Master Vietnamese Social Customs with Interactive Flashcards</p>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Stats Bar */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow-md p-4 text-center">
+            <div className="text-3xl font-bold text-gray-800">{stats.total}</div>
+            <div className="text-sm text-gray-600">Total Cards</div>
+          </div>
+          <div className="bg-green-50 rounded-lg shadow-md p-4 text-center border-2 border-green-200">
+            <div className="text-3xl font-bold text-green-600">{stats.mastered}</div>
+            <div className="text-sm text-gray-600">Mastered</div>
+          </div>
+          <div className="bg-amber-50 rounded-lg shadow-md p-4 text-center border-2 border-amber-200">
+            <div className="text-3xl font-bold text-amber-600">{stats.review}</div>
+            <div className="text-sm text-gray-600">Review</div>
+          </div>
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-3 mb-8 justify-center">
+          {categories.map(cat => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all shadow-md ${
+                  selectedCategory === cat.id
+                    ? 'bg-pink-600 text-white scale-105'
+                    : 'bg-white text-gray-700 hover:bg-pink-50'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {cat.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Card Display */}
+        {currentCard && (
+          <div className="max-w-4xl mx-auto">
+            {/* Navigation Info */}
+            <div className="text-center mb-4 text-gray-600">
+              Card {currentCardIndex + 1} of {filteredCards.length}
+            </div>
+
+            {/* Main Card */}
+            <div 
+              className="relative bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02]"
+              style={{ minHeight: '500px' }}
+              onClick={() => toggleFlip(currentCard.id)}
+            >
+              <div className={`absolute inset-0 transition-opacity duration-500 ${flippedCards[currentCard.id] ? 'opacity-0' : 'opacity-100'}`}>
+                {/* Front of Card */}
+                <div className="h-full flex flex-col">
+                  <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white p-6">
+                    <div className="text-sm font-semibold mb-2 opacity-90">
+                      {categories.find(c => c.id === currentCard.category)?.name.toUpperCase()}
+                    </div>
+                    <h2 className="text-3xl font-bold mb-2">{currentCard.title}</h2>
+                    <p className="text-xl text-pink-50 italic">{currentCard.vietnamese}</p>
+                  </div>
+                  
+                  <div className="flex-1 p-8 flex flex-col justify-center">
+                    <div className="text-center mb-8">
+                      <div className="inline-block bg-pink-100 rounded-full p-8 mb-6">
+                        <div className="text-6xl">🇻🇳</div>
+                      </div>
+                      <p className="text-2xl font-semibold text-gray-800 leading-relaxed">
+                        {currentCard.rule}
+                      </p>
+                    </div>
+                    
+                    <div className="text-center text-gray-500 text-sm">
+                      Click to see explanation →
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`absolute inset-0 transition-opacity duration-500 ${flippedCards[currentCard.id] ? 'opacity-100' : 'opacity-0'}`}>
+                {/* Back of Card */}
+                <div className="h-full flex flex-col bg-gradient-to-br from-rose-50 to-pink-50">
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-500 text-white p-6">
+                    <h3 className="text-2xl font-bold">Understanding the Custom</h3>
+                  </div>
+                  
+                  <div className="flex-1 p-8 overflow-y-auto">
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-bold text-lg text-gray-800 mb-2">Why This Matters:</h4>
+                        <p className="text-gray-700 leading-relaxed">{currentCard.explanation}</p>
+                      </div>
+                      
+                      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <h4 className="font-bold text-lg text-blue-900 mb-2">Example:</h4>
+                        <p className="text-blue-800">{currentCard.example}</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                          <div className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5" />
+                            DO:
+                          </div>
+                          <p className="text-green-700">{currentCard.dosDonts.do}</p>
+                        </div>
+                        <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+                          <div className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                            <span className="text-xl">✗</span>
+                            DON'T:
+                          </div>
+                          <p className="text-red-700">{currentCard.dosDonts.dont}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center text-gray-500 text-sm p-4">
+                    Click to flip back →
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleReview(currentCard.id);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-md ${
+                  reviewCards[currentCard.id]
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-amber-50'
+                }`}
+              >
+                <RotateCcw className="w-5 h-5" />
+                Review Later
+              </button>
+              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMastered(currentCard.id);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-md ${
+                  masteredCards[currentCard.id]
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-green-50'
+                }`}
+              >
+                <CheckCircle className="w-5 h-5" />
+                Mastered
+              </button>
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between items-center mt-8">
+              <button
+                onClick={prevCard}
+                disabled={currentCardIndex === 0}
+                className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-all"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                Previous
+              </button>
+              
+              <button
+                onClick={nextCard}
+                disabled={currentCardIndex === filteredCards.length - 1}
+                className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-all"
+              >
+                Next
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <footer className="mt-16 text-center text-gray-600 pb-8">
+          <p className="mb-2">🇻🇳 Learn, Practice, and Respect Vietnamese Culture</p>
+          <p className="text-sm">Designed for foreigners who want to truly connect with Vietnam</p>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default EtiquetteApp;
